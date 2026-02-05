@@ -1,8 +1,15 @@
 """Unit tests for embedding service."""
 import pytest
-from app.services.embedding import generate_embedding, generate_embeddings_batch
+
+# Skip tests if sentence-transformers not available
+try:
+    from app.services.embedding import generate_embedding, generate_embeddings_batch
+    EMBEDDING_AVAILABLE = True
+except ImportError:
+    EMBEDDING_AVAILABLE = False
 
 
+@pytest.mark.skipif(not EMBEDDING_AVAILABLE, reason="Embedding dependencies not available")
 def test_generate_embedding():
     """Test single embedding generation."""
     text = "This is a test complaint about credit card issues."
@@ -14,12 +21,14 @@ def test_generate_embedding():
     assert all(isinstance(x, float) for x in embedding)
 
 
+@pytest.mark.skipif(not EMBEDDING_AVAILABLE, reason="Embedding dependencies not available")
 def test_generate_embedding_empty_text():
     """Test embedding generation with empty text raises error."""
     with pytest.raises(ValueError):
         generate_embedding("")
 
 
+@pytest.mark.skipif(not EMBEDDING_AVAILABLE, reason="Embedding dependencies not available")
 def test_generate_embeddings_batch():
     """Test batch embedding generation."""
     texts = [
@@ -34,6 +43,7 @@ def test_generate_embeddings_batch():
     assert all(isinstance(emb, list) for emb in embeddings)
 
 
+@pytest.mark.skipif(not EMBEDDING_AVAILABLE, reason="Embedding dependencies not available")
 def test_generate_embeddings_batch_empty():
     """Test batch embedding with empty list."""
     embeddings = generate_embeddings_batch([])

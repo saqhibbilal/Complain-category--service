@@ -64,5 +64,5 @@ alembic/versions/*.pyc
 # Data files (optional - uncomment if you don't want to commit data)
 # data/*.json
 
-# Documentation (temporary)
-README.md
+# Documentation
+# README.md is now tracked
