@@ -61,6 +61,18 @@ export const complaintApi = {
     const response = await api.get('/search/stats')
     return response.data
   },
+
+  // List complaints with filters and pagination
+  async listComplaints(params?: {
+    skip?: number
+    limit?: number
+    product?: string
+    sub_product?: string
+    company?: string
+  }): Promise<Complaint[]> {
+    const response = await api.get<Complaint[]>('/complaints/', { params })
+    return response.data
+  },
 }
 
 export default api

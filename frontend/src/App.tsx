@@ -1,7 +1,9 @@
-import { useState } from 'react'
-import ComplaintSubmissionForm from './components/ComplaintSubmissionForm'
-import ComplaintResults from './components/ComplaintResults'
-import SimilarComplaintsList from './components/SimilarComplaintsList'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import Navigation from './components/Navigation'
+import HomePage from './pages/HomePage'
+import Dashboard from './components/Dashboard'
+import ComplaintsList from './components/ComplaintsList'
+import ComplaintDetail from './components/ComplaintDetail'
 import './App.css'
 
 export interface Complaint {
@@ -24,59 +26,29 @@ export interface SimilarComplaint {
 }
 
 function App() {
-  const [submittedComplaint, setSubmittedComplaint] = useState<Complaint | null>(null)
-  const [similarComplaints, setSimilarComplaints] = useState<SimilarComplaint[]>([])
-  const [isLoading, setIsLoading] = useState(false)
-
-  const handleComplaintSubmitted = (complaint: Complaint, similar: SimilarComplaint[]) => {
-    setSubmittedComplaint(complaint)
-    setSimilarComplaints(similar)
-  }
-
-  const handleReset = () => {
-    setSubmittedComplaint(null)
-    setSimilarComplaints([])
-  }
-
   return (
-    <div className="app">
-      <header className="app-header">
-        <div className="container">
-          <h1>Complaint Categorization System</h1>
-          <p className="subtitle">AI-powered complaint analysis with RAG</p>
-        </div>
-      </header>
+    <Router>
+      <div className="app">
+        <Navigation />
+        
+        <main className="app-main">
+          <div className="container">
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/complaints" element={<ComplaintsList />} />
+              <Route path="/complaints/:id" element={<ComplaintDetail />} />
+            </Routes>
+          </div>
+        </main>
 
-      <main className="app-main">
-        <div className="container">
-          {!submittedComplaint ? (
-            <ComplaintSubmissionForm
-              onSubmitted={handleComplaintSubmitted}
-              isLoading={isLoading}
-              setIsLoading={setIsLoading}
-            />
-          ) : (
-            <div className="results-container">
-              <button className="btn-secondary" onClick={handleReset}>
-                ← Submit New Complaint
-              </button>
-              
-              <ComplaintResults complaint={submittedComplaint} />
-              
-              {similarComplaints.length > 0 && (
-                <SimilarComplaintsList similarComplaints={similarComplaints} />
-              )}
-            </div>
-          )}
-        </div>
-      </main>
-
-      <footer className="app-footer">
-        <div className="container">
-          <p>Complaint Categorization & RAG System v1.0</p>
-        </div>
-      </footer>
-    </div>
+        <footer className="app-footer">
+          <div className="container">
+            <p>Complaint Categorization & RAG System v1.0</p>
+          </div>
+        </footer>
+      </div>
+    </Router>
   )
 }
 

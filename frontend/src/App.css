@@ -34,7 +34,8 @@
 /* Main */
 .app-main {
   flex: 1;
-  padding: 3rem 0;
+  padding: 2rem 0;
+  min-height: calc(100vh - 140px);
 }
 
 .results-container {
