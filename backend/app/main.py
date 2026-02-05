@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.database import init_db, check_pgvector_extension
+from app.api.routes import complaints, search
 import logging
 
 # Configure logging
@@ -26,6 +27,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Include routers
+app.include_router(complaints.router, prefix=settings.API_V1_PREFIX)
+app.include_router(search.router, prefix=settings.API_V1_PREFIX)
 
 
 @app.on_event("startup")
