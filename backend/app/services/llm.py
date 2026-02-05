@@ -15,11 +15,15 @@ def get_mistral_client() -> Mistral:
     """Get or initialize Mistral client (singleton pattern)."""
     global _client
     if _client is None:
-        if not settings.MISTRAL_API_KEY:
+        # Try to get API key from environment or settings
+        import os
+        api_key = os.getenv("MISTRAL_API_KEY") or settings.MISTRAL_API_KEY
+        
+        if not api_key:
             raise ValueError("MISTRAL_API_KEY is not set in environment variables")
         
         logger.info(f"Initializing Mistral client with model: {settings.MISTRAL_MODEL}")
-        _client = Mistral(api_key=settings.MISTRAL_API_KEY)
+        _client = Mistral(api_key=api_key)
         logger.info("Mistral client initialized successfully")
     return _client
 

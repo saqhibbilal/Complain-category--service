@@ -5,6 +5,8 @@ from app.config import settings
 from app.database import init_db, check_pgvector_extension
 from app.api.routes import complaints, search
 import logging
+import os
+from pathlib import Path
 
 # Configure logging
 logging.basicConfig(
@@ -37,6 +39,28 @@ app.include_router(search.router, prefix=settings.API_V1_PREFIX)
 async def startup_event():
     """Initialize database on startup."""
     print("Starting up application...")
+    
+    # Load .env file explicitly BEFORE importing settings
+    env_path = Path(__file__).parent.parent.parent / ".env"
+    if env_path.exists():
+        from dotenv import load_dotenv
+        load_dotenv(env_path, override=True)
+        print(f"Loaded .env from {env_path}")
+    
+    # Re-import settings after loading .env
+    import importlib
+    import app.config
+    importlib.reload(app.config)
+    from app import config as config_module
+    current_settings = config_module.settings
+    
+    # Check Mistral API key
+    api_key = current_settings.MISTRAL_API_KEY
+    if not api_key:
+        print("Warning: MISTRAL_API_KEY not set. LLM features will not work.")
+        print(f"  Checked .env at: {env_path}")
+    else:
+        print(f"Mistral API key loaded (length: {len(api_key)} chars)")
     
     # Check pgvector extension
     if not check_pgvector_extension():

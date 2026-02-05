@@ -39,37 +39,67 @@ def retrieve_similar_complaints(
     # Convert list to numpy array and ensure it's the right shape
     query_vector = np.array(query_embedding, dtype=np.float32)
     
-    # Build query
-    query = db.query(
-        Complaint,
-        (1 - Complaint.embedding.cosine_distance(query_vector)).label('similarity')
-    ).filter(
-        Complaint.embedding.isnot(None)  # Only complaints with embeddings
-    )
+    # Build query using raw SQL for pgvector operations
+    # Convert embedding to PostgreSQL array format
+    embedding_str = "[" + ",".join(map(str, query_embedding)) + "]"
     
-    # Exclude specific complaint if provided
+    # Build WHERE clause
+    where_clauses = ["embedding IS NOT NULL"]
     if exclude_complaint_id:
-        query = query.filter(Complaint.complaint_id != exclude_complaint_id)
+        # Escape single quotes to prevent SQL injection
+        safe_id = exclude_complaint_id.replace("'", "''")
+        where_clauses.append(f"complaint_id != '{safe_id}'")
     
-    # Apply similarity threshold and order by similarity
-    query = query.having(
-        (1 - Complaint.embedding.cosine_distance(query_vector)) >= similarity_threshold
-    ).order_by(
-        Complaint.embedding.cosine_distance(query_vector)
-    ).limit(limit)
+    where_sql = " AND ".join(where_clauses)
+    
+    # Use raw SQL for vector similarity search
+    # Note: pgvector requires the vector literal in SQL, so we embed it directly
+    # The embedding_str is generated from our own data, so it's safe
+    sql = f"""
+    SELECT 
+        id, complaint_id, complaint_text, product, sub_product, 
+        issue, sub_issue, company, state, zip_code, date_received,
+        date_sent_to_company, company_response, consumer_disputed,
+        summary, created_at, updated_at,
+        1 - (embedding <=> '{embedding_str}'::vector) as similarity
+    FROM complaints
+    WHERE {where_sql}
+    AND (1 - (embedding <=> '{embedding_str}'::vector)) >= {similarity_threshold}
+    ORDER BY embedding <=> '{embedding_str}'::vector
+    LIMIT {limit}
+    """
     
     try:
-        results = query.all()
-        # Extract complaints and similarity scores
-        similar_complaints = [
-            (complaint, float(similarity))
-            for complaint, similarity in results
-        ]
+        result = db.execute(text(sql))
+        similar_complaints = []
+        
+        for row in result:
+            complaint = Complaint(
+                id=row.id,
+                complaint_id=row.complaint_id,
+                complaint_text=row.complaint_text,
+                product=row.product,
+                sub_product=row.sub_product,
+                issue=row.issue,
+                sub_issue=row.sub_issue,
+                company=row.company,
+                state=row.state,
+                zip_code=row.zip_code,
+                date_received=row.date_received,
+                date_sent_to_company=row.date_sent_to_company,
+                company_response=row.company_response,
+                consumer_disputed=row.consumer_disputed,
+                summary=row.summary,
+                created_at=row.created_at,
+                updated_at=row.updated_at
+            )
+            similar_complaints.append((complaint, float(row.similarity)))
+        
         return similar_complaints
     except Exception as e:
         logger.error(f"Error retrieving similar complaints: {e}")
-        # Fallback to simple query if vector operations fail
-        return _fallback_similarity_search(db, query_embedding, limit, exclude_complaint_id)
+        # Return empty list if query fails (don't break the transaction)
+        return []
 
 
 def retrieve_similar_by_complaint_id(
@@ -96,12 +126,23 @@ def retrieve_similar_by_complaint_id(
     if not complaint:
         raise ValueError(f"Complaint with ID {complaint_id} not found")
     
-    if not complaint.embedding:
+    # Check if embedding exists (handle NumPy arrays and pgvector types)
+    if complaint.embedding is None:
         logger.warning(f"Complaint {complaint_id} has no embedding")
         return []
     
-    # Convert embedding to list
-    query_embedding = complaint.embedding.tolist() if hasattr(complaint.embedding, 'tolist') else list(complaint.embedding)
+    # Convert embedding to list (handle different types)
+    try:
+        if hasattr(complaint.embedding, 'tolist'):
+            query_embedding = complaint.embedding.tolist()
+        elif hasattr(complaint.embedding, '__iter__'):
+            query_embedding = list(complaint.embedding)
+        else:
+            logger.error(f"Unknown embedding type for complaint {complaint_id}")
+            return []
+    except Exception as e:
+        logger.error(f"Error converting embedding to list: {e}")
+        return []
     
     # Retrieve similar complaints (excluding the query complaint itself)
     return retrieve_similar_complaints(

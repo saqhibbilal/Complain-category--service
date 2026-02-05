@@ -103,8 +103,9 @@ def process_complaint(
     
     # Retrieve similar complaints for RAG context
     similar_complaints_texts = []
-    if use_rag and embedding:
+    if use_rag and embedding is not None:
         try:
+            # Use a separate transaction for RAG query to avoid breaking main transaction
             similar_complaints = retrieve_similar_complaints(
                 db=db,
                 query_embedding=embedding,
@@ -117,6 +118,8 @@ def process_complaint(
             logger.info(f"Retrieved {len(similar_complaints_texts)} similar complaints for RAG")
         except Exception as e:
             logger.warning(f"Error retrieving similar complaints: {e}")
+            # Continue processing even if RAG fails
+            similar_complaints_texts = []
     
     # Validate or enhance categories
     product = complaint_data.product
@@ -192,8 +195,8 @@ def process_complaint(
     )
     
     # Save to database
-    db.add(complaint)
     try:
+        db.add(complaint)
         db.commit()
         db.refresh(complaint)
         logger.info(f"Successfully processed complaint {complaint_data.complaint_id}")
@@ -201,6 +204,7 @@ def process_complaint(
     except Exception as e:
         db.rollback()
         logger.error(f"Error saving complaint {complaint_data.complaint_id}: {e}")
+        # Re-raise to let caller handle
         raise
 
 

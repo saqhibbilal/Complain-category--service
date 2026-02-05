@@ -36,13 +36,17 @@ async def find_similar_complaints(
     try:
         if request.complaint_id:
             # Find similar by complaint ID
-            similar_complaints = retrieve_similar_by_complaint_id(
-                db=db,
-                complaint_id=request.complaint_id,
-                limit=request.top_k,
-                similarity_threshold=request.similarity_threshold
-            )
-            query_complaint_id = request.complaint_id
+            try:
+                similar_complaints = retrieve_similar_by_complaint_id(
+                    db=db,
+                    complaint_id=request.complaint_id,
+                    limit=request.top_k,
+                    similarity_threshold=request.similarity_threshold
+                )
+                query_complaint_id = request.complaint_id
+            except ValueError as e:
+                # Complaint not found
+                raise HTTPException(status_code=404, detail=str(e))
             
         elif request.complaint_text:
             # Generate embedding and find similar
