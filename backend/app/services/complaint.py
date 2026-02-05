@@ -8,6 +8,7 @@ from app.services.embedding import generate_embedding, generate_embeddings_batch
 from app.services.llm import validate_category, generate_summary, categorize_complaint
 from app.services.rag import retrieve_similar_complaints
 from app.config import settings
+from app.services.error_tracking import get_error_tracker
 import logging
 
 logger = logging.getLogger(__name__)
@@ -243,7 +244,12 @@ def process_batch(
                 
                 # Skip if no complaint text
                 if not complaint_data.complaint_text or not complaint_data.complaint_text.strip():
-                    logger.warning(f"Skipping complaint {complaint_data.complaint_id}: no text")
+                    error_tracker = get_error_tracker()
+                    error_tracker.log_warning(
+                        complaint_data.complaint_id,
+                        "Complaint text is empty or missing",
+                        "missing_text"
+                    )
                     failed += 1
                     continue
                 
@@ -252,7 +258,14 @@ def process_batch(
                 successful += 1
                 
             except Exception as e:
-                logger.error(f"Error processing complaint: {e}")
+                error_tracker = get_error_tracker()
+                complaint_id = complaint_json.get("_source", complaint_json).get("complaint_id", "unknown")
+                error_tracker.log_error(
+                    complaint_id,
+                    str(e),
+                    "processing_error",
+                    complaint_json
+                )
                 failed += 1
             
             processed += 1
