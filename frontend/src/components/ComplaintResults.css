@@ -1,5 +1,5 @@
 .results-card {
-  background: var(--bg);
+  background: var(--bg-secondary);
   border: 2px solid var(--border);
   border-radius: 12px;
   padding: 2.5rem;
@@ -7,10 +7,10 @@
 }
 
 .results-card h2 {
-  margin-bottom: 2rem;
-  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  font-size: 1.75rem;
   border-bottom: 2px solid var(--border);
-  padding-bottom: 1rem;
+  padding-bottom: 0.875rem;
 }
 
 .results-section {
@@ -34,16 +34,16 @@
 }
 
 .result-value {
-  font-size: 1rem;
+  font-size: 0.9rem;
   color: var(--text);
   font-weight: 400;
 }
 
 .result-text {
-  font-size: 1rem;
+  font-size: 0.9rem;
   color: var(--text);
   line-height: 1.7;
-  padding: 1rem;
+  padding: 0.875rem;
   background: var(--bg-secondary);
   border-radius: 8px;
   border-left: 4px solid var(--primary);
@@ -54,11 +54,11 @@
 }
 
 .result-summary {
-  font-size: 1rem;
+  font-size: 0.9rem;
   color: var(--text);
   line-height: 1.7;
-  padding: 1rem;
-  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  padding: 0.875rem;
+  background: rgba(219, 208, 192, 0.1);
   border-radius: 8px;
   border-left: 4px solid var(--primary);
   font-style: italic;
@@ -72,7 +72,7 @@
 }
 
 .category-card {
-  background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg) 100%);
+  background: var(--bg);
   border: 2px solid var(--border);
   border-radius: 8px;
   padding: 1.25rem;
@@ -95,7 +95,7 @@
 }
 
 .category-value {
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--primary);
 }
@@ -105,7 +105,7 @@
   gap: 2rem;
   flex-wrap: wrap;
   padding: 1rem;
-  background: var(--bg-secondary);
+  background: var(--bg);
   border-radius: 8px;
 }
 

@@ -5,24 +5,25 @@
 }
 
 :root {
-  --primary: #2563eb;
-  --primary-dark: #1e40af;
+  --primary: #dbd0c0;
+  --primary-dark: #c9bfb0;
   --secondary: #64748b;
   --success: #10b981;
   --error: #ef4444;
   --warning: #f59e0b;
-  --bg: #ffffff;
-  --bg-secondary: #f8fafc;
-  --text: #0f172a;
-  --text-secondary: #475569;
-  --border: #e2e8f0;
-  --shadow: rgba(0, 0, 0, 0.1);
-  --shadow-lg: rgba(0, 0, 0, 0.15);
+  --bg: #213537;
+  --bg-secondary: #1a2829;
+  --text: #dbd0c0;
+  --text-secondary: #c9bfb0;
+  --border: #3d4f52;
+  --shadow: rgba(0, 0, 0, 0.3);
+  --shadow-lg: rgba(0, 0, 0, 0.4);
 }
 
 body {
   font-family: 'Quantico', monospace;
   font-weight: 400;
+  font-size: 0.95rem;
   line-height: 1.6;
   color: var(--text);
   background: var(--bg-secondary);
@@ -43,15 +44,15 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 h1 {
-  font-size: 2.5rem;
-}
-
-h2 {
   font-size: 2rem;
 }
 
+h2 {
+  font-size: 1.75rem;
+}
+
 h3 {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
 }
 
 /* Buttons */

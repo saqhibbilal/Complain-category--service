@@ -13,24 +13,21 @@
 
 /* Header */
 .app-header {
-  background: var(--bg);
+  background: var(--bg-secondary);
   border-bottom: 2px solid var(--border);
   padding: 2rem 0;
   box-shadow: 0 2px 8px var(--shadow);
 }
 
 .app-header h1 {
-  font-size: 2.5rem;
+  font-size: 2rem;
   margin-bottom: 0.5rem;
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--primary);
 }
 
 .subtitle {
   color: var(--text-secondary);
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   font-weight: 400;
 }
 
@@ -48,13 +45,13 @@
 
 /* Footer */
 .app-footer {
-  background: var(--bg);
+  background: var(--bg-secondary);
   border-top: 2px solid var(--border);
-  padding: 1.5rem 0;
+  padding: 1.25rem 0;
   margin-top: auto;
   text-align: center;
   color: var(--text-secondary);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }
 
 /* Responsive */
@@ -64,7 +61,7 @@
   }
 
   .app-header h1 {
-    font-size: 2rem;
+    font-size: 1.75rem;
   }
 
   .app-main {
