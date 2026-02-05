@@ -14,6 +14,7 @@ from app.schemas import (
 from app.models import Complaint
 from app.services.rag import retrieve_similar_complaints, retrieve_similar_by_complaint_id
 from app.services.embedding import generate_embedding
+from app.services.cache import get_cached, set_cached, get_cache_key
 import logging
 
 logger = logging.getLogger(__name__)
@@ -98,7 +99,15 @@ async def get_stats(db: Session = Depends(get_db)):
     - Total unique companies
     - Complaints by product
     - Complaints by state
+    
+    Results are cached for 5 minutes to improve performance.
     """
+    # Check cache first
+    cache_key = get_cache_key("stats", "all")
+    cached_stats = get_cached(cache_key, ttl_seconds=300)
+    if cached_stats:
+        return StatsResponse(**cached_stats)
+    
     try:
         # Total complaints
         total_complaints = db.query(func.count(Complaint.id)).scalar()
@@ -129,13 +138,18 @@ async def get_stats(db: Session = Depends(get_db)):
             state: count for state, count in state_counts if state
         }
         
-        return StatsResponse(
-            total_complaints=total_complaints or 0,
-            total_products=total_products or 0,
-            total_companies=total_companies or 0,
-            complaints_by_product=complaints_by_product,
-            complaints_by_state=complaints_by_state
-        )
+        stats_data = {
+            "total_complaints": total_complaints or 0,
+            "total_products": total_products or 0,
+            "total_companies": total_companies or 0,
+            "complaints_by_product": complaints_by_product,
+            "complaints_by_state": complaints_by_state
+        }
+        
+        # Cache the results
+        set_cached(cache_key, stats_data, ttl_seconds=300)
+        
+        return StatsResponse(**stats_data)
         
     except Exception as e:
         logger.error(f"Error getting stats: {e}")
