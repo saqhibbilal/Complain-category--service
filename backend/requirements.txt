@@ -20,7 +20,7 @@ torch==2.1.0
 transformers==4.35.0
 
 # Mistral API
-mistralai==0.1.0
+mistralai>=1.0.0
 
 # HTTP client
 httpx==0.25.1
